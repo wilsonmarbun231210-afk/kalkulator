@@ -264,6 +264,39 @@
   }
   #intro .go:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 40px var(--accent-shadow); }
   #intro .go:active { transform: scale(0.95); }
+  #intro .mode-btns {
+    display: flex;
+    gap: 14px;
+    animation: introBtn 1.2s ease 0.5s both;
+  }
+  #intro .mode-btn {
+    height: auto;
+    padding: 13px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    cursor: pointer;
+    box-shadow: 0 8px 24px var(--accent-shadow);
+    transition: transform 0.12s, box-shadow 0.2s;
+  }
+  #intro .mode-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 12px 34px var(--accent-shadow); }
+  #intro .mode-btn:active { transform: scale(0.95); }
+  #intro .mode-btn.alt {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  body.light #intro .mode-btn.alt { background: rgba(0, 0, 0, 0.08); border-color: rgba(0, 0, 0, 0.2); }
+  @media (max-width: 480px) {
+    #intro h1 { font-size: 34px; letter-spacing: 4px; }
+    #intro .sub { font-size: 13px; letter-spacing: 3px; }
+    #intro .mode-btns { flex-direction: column; gap: 10px; }
+    #intro .mode-btn { padding: 12px 26px; font-size: 15px; }
+  }
   #intro.exit { opacity: 0; transform: translateY(-30px); pointer-events: none; }
   @keyframes introTitle {
     from { opacity: 0; transform: scale(0.9); letter-spacing: 20px; }
@@ -745,6 +778,54 @@
   body.light .mem-btns button.danger { color: var(--accent-dark); }
   .result { cursor: pointer; }
   .result:hover { color: var(--accent-expr); }
+  body.mode-mobile .credit { margin-bottom: 10px; font-size: 13px; letter-spacing: 3px; }
+  body.mode-mobile .credit span { font-size: 15px; }
+  body.mode-mobile .calc,
+  body.mode-mobile .history { width: min(400px, calc(100% - 16px)); }
+  body.mode-mobile .calc { padding: 14px; border-radius: 20px; }
+  body.mode-mobile .display { padding: 12px 10px; margin-bottom: 12px; border-radius: 12px; }
+  body.mode-mobile .expr { font-size: 13px; min-height: 18px; }
+  body.mode-mobile .result { font-size: 30px; min-height: 42px; }
+  body.mode-mobile .grid { gap: 8px; }
+  body.mode-mobile button { height: 50px; font-size: 17px; border-radius: 12px; }
+  body.mode-mobile .op, body.mode-mobile .eq { font-size: 20px; }
+  body.mode-mobile .history { margin-top: 10px; max-height: 160px; padding: 8px 10px; border-radius: 14px; }
+  body.mode-mobile .hist-item { font-size: 13px; }
+  body.mode-mobile .toggle-btn { top: 8px; left: 10px; right: auto; transform: none; width: 40px; height: 40px; }
+  body.mode-mobile.calc-hidden .toggle-btn { transform: rotate(180deg); }
+  body.mode-mobile .theme-btn { top: 8px; right: 10px; height: 40px; padding: 0 14px; font-size: 13px; }
+  body.mode-mobile .palette {
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 9px;
+    gap: 6px;
+    border-radius: 20px;
+    max-width: calc(100% - 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  body.mode-mobile .palette .dot { width: 18px; height: 18px; border-width: 1.5px; }
+  body.mode-mobile .palette .mute { height: 24px; padding: 0 9px; font-size: 10px; }
+  body.mode-mobile .palette .divider { height: 16px; }
+  body.mode-mobile .char { height: 36vh; }
+  body.mode-mobile .bubble { font-size: 13px; padding: 8px 10px; max-width: 200px; }
+  body.mode-mobile .bubble-d3 { bottom: 41vh; left: 2vw; }
+  body.mode-mobile .bubble-av { bottom: 41vh; right: 2vw; }
+  body.mode-mobile .game { width: min(400px, 94vw); padding: 14px; }
+  body.mode-mobile .game-title { font-size: 13px; }
+  body.mode-mobile .game-tabs .tab { padding: 5px 9px; font-size: 11px; }
+  body.mode-mobile .gm-input { flex-wrap: wrap; }
+  body.mode-mobile .gm-input input { height: 46px; font-size: 18px; }
+  body.mode-mobile .gm-input .conv-sel { flex: 0 0 96px; width: 96px; height: 46px; font-size: 13px; }
+  body.mode-mobile .gm-go { height: 46px; width: 84px; font-size: 15px; }
+  body.mode-mobile .gm-restart { height: 38px; font-size: 13px; }
+  body.mode-mobile .mem-btns button { height: 42px; font-size: 13px; }
+  body.mode-mobile .mem-display { font-size: 24px; padding: 12px; }
+  body.mode-mobile .gm-hint { font-size: 13px; min-height: 40px; padding: 8px 10px; }
+  body.mode-mobile .conv-sel { font-size: 13px; }
+  body.mode-mobile .conv-swap { height: 34px; padding: 0 16px; font-size: 12px; }
+  body.mode-mobile .shadow { display: none; }
 </style>
 </head>
 <body>
@@ -762,6 +843,8 @@
   <button class="dot" data-t="gold" style="--c:#ffc107" title="emas"></button>
   <span class="divider"></span>
   <button class="mute" id="muteBtn">suara: on</button>
+  <span class="divider"></span>
+  <button class="mute" id="modeBtn">mode HP</button>
   <span class="divider"></span>
   <button class="mute game-btn" id="gameBtn">minigame</button>
   <span class="divider"></span>
@@ -901,7 +984,10 @@
 <div id="intro">
   <h1>KALKULATOR</h1>
   <div class="sub">made by wilson</div>
-  <button class="go" id="goBtn">Let's Go</button>
+  <div class="mode-btns">
+    <button class="mode-btn alt" id="modePcBtn">mode PC</button>
+    <button class="mode-btn" id="modeHpBtn">mode HP</button>
+  </div>
 </div>
 
 <script>
@@ -1350,6 +1436,18 @@ document.querySelectorAll('#palette .dot').forEach(d => {
 const savedColor = localStorage.getItem('kalkColor');
 setColor(colorNames.indexOf(savedColor) !== -1 ? savedColor : 'pink');
 
+const modeBtn = document.getElementById('modeBtn');
+function setMode(m) {
+  const mobile = m === 'hp';
+  document.body.classList.toggle('mode-mobile', mobile);
+  modeBtn.textContent = mobile ? 'mode PC' : 'mode HP';
+}
+modeBtn.addEventListener('click', () => {
+  const mobile = document.body.classList.contains('mode-mobile');
+  setMode(mobile ? 'pc' : 'hp');
+  showBubble(randomChar(), mobile ? 'kembali ke mode PC' : 'berpindah ke mode HP, pas untuk layar kecil');
+});
+
 document.addEventListener('keydown', e => {
   if (gameEl.classList.contains('open') || toolsEl.classList.contains('open')) {
     if (e.key === 'Escape') { closeGame(); closeTools(); }
@@ -1357,7 +1455,7 @@ document.addEventListener('keydown', e => {
   }
   const intro = document.getElementById('intro');
   if (intro && e.key === 'Enter') {
-    document.getElementById('goBtn').click();
+    enterMode('pc');
     return;
   }
   const map = {
@@ -1386,11 +1484,14 @@ function startEntrance() {
 }
 
 const intro = document.getElementById('intro');
-document.getElementById('goBtn').addEventListener('click', () => {
+function enterMode(mode) {
+  setMode(mode);
   intro.classList.add('exit');
   startEntrance();
   setTimeout(() => intro.remove(), 650);
-});
+}
+document.getElementById('modePcBtn').addEventListener('click', () => enterMode('pc'));
+document.getElementById('modeHpBtn').addEventListener('click', () => enterMode('hp'));
 
 document.querySelectorAll('.char img').forEach(img => {
   img.addEventListener('animationend', () => {
