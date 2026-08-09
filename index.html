@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --accent: #ff2e63;
+    --accent-2: #ff5470;
+    --accent-soft: #ffb3c6;
+    --accent-expr: #ff8fb3;
+    --accent-grad: linear-gradient(90deg, #ff2e63, #ffb3c6, #ff5470, #ff2e63);
+    --accent-shadow: rgba(255, 46, 99, 0.8);
+    --accent-flash: rgba(255, 46, 99, 0.55);
+    --accent-dark: #c2185b;
+    --accent-op: #d81b60;
+    --accent-fn: #ad1457;
+    --accent-head: #c2185b;
+  }
+  body.theme-purple {
+    --accent: #9c27b0; --accent-2: #ba68c8; --accent-soft: #e1bee7; --accent-expr: #ce93d8;
+    --accent-grad: linear-gradient(90deg, #9c27b0, #e1bee7, #ba68c8, #9c27b0);
+    --accent-shadow: rgba(156, 39, 176, 0.8); --accent-flash: rgba(156, 39, 176, 0.55);
+    --accent-dark: #6a1b9a; --accent-op: #7b1fa2; --accent-fn: #6a1b9a; --accent-head: #6a1b9a;
+  }
+  body.theme-cyan {
+    --accent: #00bcd4; --accent-2: #4dd0e1; --accent-soft: #b2ebf2; --accent-expr: #80deea;
+    --accent-grad: linear-gradient(90deg, #00bcd4, #b2ebf2, #4dd0e1, #00bcd4);
+    --accent-shadow: rgba(0, 188, 212, 0.8); --accent-flash: rgba(0, 188, 212, 0.55);
+    --accent-dark: #00838f; --accent-op: #0097a7; --accent-fn: #00838f; --accent-head: #00838f;
+  }
+  body.theme-green {
+    --accent: #4caf50; --accent-2: #81c784; --accent-soft: #c8e6c9; --accent-expr: #a5d6a7;
+    --accent-grad: linear-gradient(90deg, #4caf50, #c8e6c9, #81c784, #4caf50);
+    --accent-shadow: rgba(76, 175, 80, 0.8); --accent-flash: rgba(76, 175, 80, 0.55);
+    --accent-dark: #2e7d32; --accent-op: #388e3c; --accent-fn: #2e7d32; --accent-head: #2e7d32;
+  }
+  body.theme-orange {
+    --accent: #ff9800; --accent-2: #ffb74d; --accent-soft: #ffe0b2; --accent-expr: #ffcc80;
+    --accent-grad: linear-gradient(90deg, #ff9800, #ffe0b2, #ffb74d, #ff9800);
+    --accent-shadow: rgba(255, 152, 0, 0.8); --accent-flash: rgba(255, 152, 0, 0.55);
+    --accent-dark: #e65100; --accent-op: #ef6c00; --accent-fn: #e65100; --accent-head: #e65100;
+  }
+  body.theme-gold {
+    --accent: #ffc107; --accent-2: #ffd54f; --accent-soft: #fff9c4; --accent-expr: #ffe082;
+    --accent-grad: linear-gradient(90deg, #ffc107, #fff9c4, #ffd54f, #ffc107);
+    --accent-shadow: rgba(255, 193, 7, 0.8); --accent-flash: rgba(255, 193, 7, 0.55);
+    --accent-dark: #8d6e00; --accent-op: #f57f17; --accent-fn: #8d6e00; --accent-head: #8d6e00;
+  }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0d0b1e;
+    position: relative;
+  }
+  #bg {
+    position: fixed;
+    top: -8%;
+    left: -8%;
+    width: 116%;
+    height: 116%;
+    z-index: -1;
+    background: url('pintu.webp') center center / cover no-repeat;
+    animation: kenburns 26s ease-in-out infinite alternate;
+  }
+  @keyframes kenburns {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.18) translate(2%, -2%); }
+  }
+  #fx {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #flash {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(120deg, transparent 20%, var(--accent-flash) 50%, transparent 80%);
+  }
+  #flash.go { animation: flashSweep 0.8s ease forwards; }
+  @keyframes flashSweep {
+    0% { opacity: 0; transform: translateX(-100%); }
+    30% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(100%); }
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(13, 11, 30, 0.18) 0%, rgba(13, 11, 30, 0.5) 100%);
+    z-index: 0;
+  }
+  .credit {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+    font-size: 16px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: lowercase;
+    animation: creditIn 0.9s ease both;
+  }
+  .credit span {
+    font-weight: 700;
+    font-size: 19px;
+    background-image:
+      linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.85) 50%, transparent 80%),
+      var(--accent-grad);
+    background-size: 250% 100%, 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: creditShine 3.2s linear infinite;
+  }
+  @keyframes creditShine {
+    0% { background-position: -250% 0, 0% 50%; }
+    55% { background-position: 250% 0, 300% 50%; }
+    100% { background-position: 250% 0, 300% 50%; }
+  }
+  @keyframes creditIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .toggle-btn {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.15s;
+    font-family: inherit;
+  }
+  .toggle-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  body.calc-hidden .toggle-btn { transform: translateX(-50%) rotate(180deg); }
+  .theme-btn {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 5;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  .theme-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .palette {
+    position: fixed;
+    top: 14px;
+    left: 18px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .palette .dot {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    background: var(--c);
+    cursor: pointer;
+  }
+  .palette .dot.on {
+    border-color: #fff;
+    box-shadow: 0 0 8px var(--c);
+    transform: scale(1.15);
+  }
+  .palette .divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .palette .mute {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+  }
+  body.light .palette {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+  body.light .palette .dot { border-color: rgba(0, 0, 0, 0.25); }
+  body.light .palette .dot.on { border-color: #000; }
+  body.light .palette .divider { background: rgba(0, 0, 0, 0.25); }
+  body.light .palette .mute { color: #1a1024; background: rgba(0, 0, 0, 0.08); }
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(10, 8, 24, 0.85);
+    backdrop-filter: blur(6px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #intro h1 {
+    font-size: 46px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: introTitle 1.2s ease both;
+  }
+  #intro .sub {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 15px;
+    letter-spacing: 4px;
+    text-transform: lowercase;
+    animation: introSub 1.2s ease 0.3s both;
+  }
+  #intro .go {
+    height: auto;
+    margin-top: 12px;
+    padding: 14px 44px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    cursor: pointer;
+    box-shadow: 0 8px 30px var(--accent-shadow);
+    animation: introBtn 1.2s ease 0.5s both;
+    transition: transform 0.12s, box-shadow 0.2s;
+  }
+  #intro .go:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 40px var(--accent-shadow); }
+  #intro .go:active { transform: scale(0.95); }
+  #intro.exit { opacity: 0; transform: translateY(-30px); pointer-events: none; }
+  @keyframes introTitle {
+    from { opacity: 0; transform: scale(0.9); letter-spacing: 20px; }
+    to { opacity: 1; transform: scale(1); letter-spacing: 6px; }
+  }
+  @keyframes introSub {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes introBtn {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  body.light #intro { background: rgba(255, 255, 255, 0.92); }
+  body.light #intro .sub { color: rgba(30, 20, 45, 0.75); }
+  .calc {
+    position: relative;
+    z-index: 1;
+    width: 400px;
+    padding: 22px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.5s ease;
+  }
+  body.calc-hidden .calc {
+    transform: translateY(80px);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .display {
+    text-align: right;
+    padding: 18px 14px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .expr {
+    color: var(--accent-expr);
+    font-size: 15px;
+    min-height: 20px;
+    opacity: 0.85;
+    word-break: break-all;
+  }
+  .result {
+    color: #fff;
+    font-size: 40px;
+    font-weight: 600;
+    min-height: 50px;
+    word-break: break-all;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  button {
+    height: 62px;
+    font-size: 20px;
+    font-weight: 500;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: transform 0.08s, background 0.15s;
+    font-family: inherit;
+  }
+  button:hover { background: rgba(255, 255, 255, 0.18); }
+  button:active { transform: scale(0.94); }
+  button.press {
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 0 16px var(--accent-shadow);
+    transform: scale(0.94);
+  }
+  .op { color: var(--accent); font-size: 24px; }
+  .fn { color: var(--accent-soft); }
+  .eq {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-size: 24px;
+  }
+  .eq:hover { background: linear-gradient(135deg, var(--accent-2), var(--accent)); }
+  .zero { grid-column: span 3; }
+  .history {
+    position: relative;
+    z-index: 1;
+    width: 400px;
+    margin-top: 14px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 10px 12px;
+    color: #fff;
+    transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.5s ease;
+  }
+  body.calc-hidden .history {
+    transform: translateY(80px);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .history-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--accent-expr);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .history-head button {
+    height: auto;
+    font-size: 12px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .hist-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .hist-item:hover { background: rgba(255, 255, 255, 0.12); }
+  .hist-expr { color: var(--accent-soft); word-break: break-all; }
+  .hist-res { color: #fff; font-weight: 600; word-break: break-all; }
+  .hist-empty { color: rgba(255, 255, 255, 0.4); font-size: 13px; text-align: center; padding: 8px; }
+  .shadow {
+    position: fixed;
+    bottom: 3vh;
+    width: 26vw;
+    height: 4vh;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5), transparent 70%);
+    z-index: 0;
+  }
+  .shadow-d3 { left: 3vw; }
+  .shadow-av { right: 3vw; }
+  .char {
+    position: fixed;
+    bottom: 0;
+    height: 56vh;
+    cursor: grab;
+    z-index: 1;
+    transition: transform 1.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+  }
+  .char:active { cursor: grabbing; }
+  .char img {
+    height: 100%;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+  .char-d3 { left: 4vw; transform: translateX(-125vw); }
+  .char-av { right: 4vw; transform: translateX(125vw); }
+  body.loaded .char-d3 { transform: translateX(0); }
+  body.loaded .char-av { transform: translateX(0); }
+  .char:hover img { transform: translateY(-8px); }
+  .char:active img { transform: scale(0.96); }
+  .char img.walk { animation: walkBob 1.9s ease-in-out; }
+  @keyframes walkBob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-16px) rotate(-4deg); }
+    50% { transform: translateY(8px) rotate(3deg); }
+    75% { transform: translateY(-10px) rotate(-2deg); }
+  }
+  .char img.jump { animation: charJump 0.7s ease; }
+  @keyframes charJump {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    40% { transform: translateY(-46px) rotate(-4deg); }
+    70% { transform: translateY(-12px) rotate(3deg); }
+  }
+  .char img.shake { animation: charShake 0.5s ease; }
+  @keyframes charShake {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-9px) rotate(-3deg); }
+    75% { transform: translateX(9px) rotate(3deg); }
+  }
+  .char img.shiver { animation: charShiver 0.8s ease; }
+  @keyframes charShiver {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    20% { transform: translateX(-4px) translateY(-2px); }
+    40% { transform: translateX(4px) translateY(1px); }
+    60% { transform: translateX(-4px) translateY(-2px); }
+    80% { transform: translateX(4px) translateY(1px); }
+  }
+  .char-d3 img { animation: neonD3 2.6s ease-in-out infinite; }
+  .char-av img { animation: neonAv 2.6s ease-in-out infinite; }
+  @keyframes neonD3 {
+    0%, 100% { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(255, 217, 92, 0.5)); }
+    50% { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 26px rgba(255, 217, 92, 0.95)); }
+  }
+  @keyframes neonAv {
+    0%, 100% { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(125, 255, 138, 0.5)); }
+    50% { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 26px rgba(125, 255, 138, 0.95)); }
+  }
+  .bubble {
+    position: fixed;
+    z-index: 3;
+    background: rgba(0, 0, 0, 0.78);
+    border: 2px solid #888;
+    border-radius: 6px;
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.4;
+    max-width: 250px;
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+  .bubble .who { font-weight: 600; margin-right: 8px; }
+  .bubble-d3 .who { color: #ffd95c; }
+  .bubble-av .who { color: #7dff8a; }
+  .bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid #888;
+  }
+  .bubble-d3 { left: 5vw; bottom: 62vh; }
+  .bubble-d3::after { left: 18px; }
+  .bubble-av { right: 5vw; bottom: 62vh; }
+  .bubble-av::after { right: 18px; }
+  body.light::after {
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.8) 100%);
+  }
+  body.light .credit { color: rgba(40, 25, 55, 0.75); }
+  body.light .calc {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 20px 60px rgba(60, 30, 70, 0.3);
+  }
+  body.light .display {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+  body.light .expr { color: var(--accent-dark); }
+  body.light .result { color: #1a1024; }
+  body.light button {
+    color: #1a1024;
+    background: rgba(0, 0, 0, 0.06);
+  }
+  body.light button:hover { background: rgba(0, 0, 0, 0.12); }
+  body.light .op { color: var(--accent-op); }
+  body.light .fn { color: var(--accent-fn); }
+  body.light .history {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(255, 255, 255, 0.75);
+  }
+  body.light .history-head { color: var(--accent-head); }
+  body.light .hist-expr { color: var(--accent-fn); }
+  body.light .hist-res { color: #1a1024; }
+  body.light .hist-empty { color: rgba(0, 0, 0, 0.4); }
+  body.light .theme-btn {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.08);
+    color: #1a1024;
+  }
+  body.light .theme-btn:hover { background: rgba(0, 0, 0, 0.15); }
+  .game-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-weight: 600;
+  }
+  .game-btn:hover { filter: brightness(1.18); }
+  .game {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    z-index: 40;
+    width: 400px;
+    max-width: 92vw;
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(15, 12, 32, 0.94);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .game.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .game-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .game-title {
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: lowercase;
+    color: var(--accent);
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .game-tabs { display: flex; gap: 6px; }
+  .game-tabs .tab {
+    height: auto;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+  .game-tabs .tab.on {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    font-weight: 600;
+  }
+  .game-close {
+    height: 30px;
+    width: 30px;
+    padding: 0;
+    font-size: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  body.light .game {
+    background: rgba(255, 255, 255, 0.97);
+    color: #1a1024;
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 60px rgba(60, 30, 70, 0.3);
+  }
+  body.light .game-tabs .tab { color: #1a1024; background: rgba(0, 0, 0, 0.08); }
+  body.light .game-close { color: #1a1024; background: rgba(0, 0, 0, 0.1); }
+  .gm-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 10px;
+  }
+  body.light .gm-status { color: rgba(30, 20, 45, 0.75); }
+  .gm-status b { color: var(--accent); }
+  .gm-hint {
+    min-height: 44px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--accent-soft);
+  }
+  body.light .gm-hint { background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.12); color: var(--accent-fn); }
+  .gm-input { display: flex; gap: 10px; margin-bottom: 12px; }
+  .gm-input input {
+    flex: 1;
+    min-width: 0;
+    height: 50px;
+    padding: 0 14px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    outline: none;
+    text-align: center;
+  }
+  .gm-input input:focus { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-shadow); }
+  body.light .gm-input input { color: #1a1024; background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.15); }
+  .gm-go {
+    width: 96px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    cursor: pointer;
+  }
+  .gm-go:hover { filter: brightness(1.12); }
+  .gm-restart {
+    width: 100%;
+    height: 42px;
+    font-size: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-soft);
+    cursor: pointer;
+  }
+  .gm-restart:hover { background: rgba(255, 255, 255, 0.15); }
+  body.light .gm-restart { color: var(--accent-fn); background: rgba(0, 0, 0, 0.06); }
+  body.light .gm-restart:hover { background: rgba(0, 0, 0, 0.12); }
+  .conv-cat { margin-bottom: 12px; }
+  .conv-sel {
+    height: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    outline: none;
+  }
+  .conv-sel:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-shadow); }
+  .conv-sel option { background: #1a1024; color: #fff; }
+  body.light .conv-sel { color: #1a1024; background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.15); }
+  body.light .conv-sel option { background: #fff; color: #1a1024; }
+  .conv-cat .conv-sel { width: 100%; }
+  .gm-input .conv-sel { flex: 0 0 118px; width: 118px; height: 50px; }
+  .gm-input input[readonly] { color: var(--accent); }
+  .conv-mid { text-align: center; margin: 4px 0 12px; }
+  .conv-swap {
+    height: 38px;
+    padding: 0 22px;
+    font-size: 13px;
+    border-radius: 19px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-soft);
+  }
+  .conv-swap:hover { background: rgba(255, 255, 255, 0.15); }
+  body.light .conv-swap { color: var(--accent-fn); background: rgba(0, 0, 0, 0.06); }
+  body.light .conv-swap:hover { background: rgba(0, 0, 0, 0.12); }
+  .mem-display {
+    text-align: center;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-all;
+  }
+  body.light .mem-display { background: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.12); }
+  .mem-btns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .mem-btns button {
+    height: 48px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-soft);
+  }
+  .mem-btns button:hover { background: rgba(255, 255, 255, 0.15); }
+  .mem-btns button.danger { color: var(--accent); }
+  body.light .mem-btns button { color: var(--accent-fn); background: rgba(0, 0, 0, 0.06); }
+  body.light .mem-btns button.danger { color: var(--accent-dark); }
+  .result { cursor: pointer; }
+  .result:hover { color: var(--accent-expr); }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="fx"></canvas>
+<div id="flash"></div>
+<button class="toggle-btn" id="toggleCalc" title="Sembunyikan / tampilkan kalkulator">⌄</button>
+<button class="theme-btn" id="themeBtn">mode terang</button>
+<div class="palette" id="palette">
+  <button class="dot" data-t="pink" style="--c:#ff2e63" title="pink"></button>
+  <button class="dot" data-t="purple" style="--c:#9c27b0" title="ungu"></button>
+  <button class="dot" data-t="cyan" style="--c:#00bcd4" title="cyan"></button>
+  <button class="dot" data-t="green" style="--c:#4caf50" title="hijau"></button>
+  <button class="dot" data-t="orange" style="--c:#ff9800" title="oranye"></button>
+  <button class="dot" data-t="gold" style="--c:#ffc107" title="emas"></button>
+  <span class="divider"></span>
+  <button class="mute" id="muteBtn">suara: on</button>
+  <span class="divider"></span>
+  <button class="mute game-btn" id="gameBtn">minigame</button>
+  <span class="divider"></span>
+  <button class="mute game-btn" id="toolsBtn">tools</button>
+</div>
+
+<div class="credit">made by <span>wilson</span></div>
+<div class="calc">
+  <div class="display">
+    <div class="expr" id="expr"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="grid">
+    <button class="fn" data-k="C">C</button>
+    <button class="fn" data-k="back">⌫</button>
+    <button class="fn" data-k="%">%</button>
+    <button class="op" data-k="div">÷</button>
+    <button class="fn" data-k="sq">x²</button>
+    <button class="fn" data-k="sqrt">√</button>
+    <button data-k="7">7</button>
+    <button data-k="8">8</button>
+    <button data-k="9">9</button>
+    <button class="op" data-k="mul">×</button>
+    <button class="fn" data-k="neg">±</button>
+    <button data-k="4">4</button>
+    <button data-k="5">5</button>
+    <button data-k="6">6</button>
+    <button class="op" data-k="sub">−</button>
+    <button data-k="00">00</button>
+    <button data-k="1">1</button>
+    <button data-k="2">2</button>
+    <button data-k="3">3</button>
+    <button class="op" data-k="add">+</button>
+    <button class="zero" data-k="0">0</button>
+    <button data-k=".">.</button>
+    <button class="eq" data-k="eq">=</button>
+  </div>
+</div>
+
+<div class="history" id="history">
+  <div class="history-head">
+    <span>Riwayat</span>
+    <button id="clearHist">hapus</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<div class="shadow shadow-d3"></div>
+<div class="shadow shadow-av"></div>
+<div class="char char-d3" id="d3char"><img src="d3rlord3_sprite.png" alt="D3rlord3"></div>
+<div class="char char-av" id="avchar"><img src="avery_sprite.png" alt="Avery"></div>
+
+<div class="bubble bubble-d3" id="d3bubble"><span class="who">D3rlord3</span><span class="msg">you are real</span></div>
+<div class="bubble bubble-av" id="avbubble"><span class="who">Avery</span><span class="msg">hello im avery</span></div>
+
+<div class="game" id="game">
+  <div class="game-head">
+    <span class="game-title">minigame</span>
+    <div class="game-tabs">
+      <button class="tab on" data-mode="guess">tebak angka</button>
+      <button class="tab" data-mode="math">hitung cepat</button>
+    </div>
+    <button class="game-close" id="gameClose" title="tutup minigame">×</button>
+  </div>
+
+  <div class="gm" id="gm-guess">
+    <div class="gm-status">
+      <span class="gm-range">1 – 100</span>
+      <span class="gm-attempts">percobaan: <b id="gAttempts">0</b></span>
+      <span class="gm-best">terbaik: <b id="gBest">–</b></span>
+    </div>
+    <div class="gm-hint" id="gHint">pilih angka di antara 1 sampai 100. D3rlord3 dan Avery siap membantu.</div>
+    <div class="gm-input">
+      <input type="number" id="gGuessInput" min="1" max="100" placeholder="1–100">
+      <button class="gm-go" id="gGuessBtn">tebak</button>
+    </div>
+    <button class="gm-restart" id="gRestart">mulai ulang</button>
+  </div>
+
+  <div class="gm" id="gm-math" hidden>
+    <div class="gm-status">
+      <span class="gm-range" id="mQ">soal</span>
+      <span class="gm-attempts">skor: <b id="mScore">0</b></span>
+      <span class="gm-time">sisa: <b id="mTime">30</b>s</span>
+    </div>
+    <div class="gm-hint" id="mHint">jawab secepatnya, setiap benar dapat +1. waktu 30 detik!</div>
+    <div class="gm-input">
+      <input type="number" id="mAnswerInput" placeholder="jawaban">
+      <button class="gm-go" id="mAnswerBtn">jawab</button>
+    </div>
+    <button class="gm-restart" id="mRestart">mulai ulang</button>
+  </div>
+</div>
+
+<div class="game" id="tools">
+  <div class="game-head">
+    <span class="game-title">tools</span>
+    <div class="game-tabs">
+      <button class="tab on" data-mode="conv">konversi</button>
+      <button class="tab" data-mode="mem">memori</button>
+    </div>
+    <button class="game-close" id="toolsClose" title="tutup tools">×</button>
+  </div>
+
+  <div class="gm" id="gm-conv">
+    <div class="conv-cat">
+      <select class="conv-sel" id="convCat">
+        <option value="panjang">panjang</option>
+        <option value="berat">berat</option>
+        <option value="suhu">suhu</option>
+        <option value="kecepatan">kecepatan</option>
+      </select>
+    </div>
+    <div class="gm-input">
+      <input type="number" id="convVal" placeholder="0">
+      <select class="conv-sel" id="convFrom"></select>
+    </div>
+    <div class="conv-mid"><button class="conv-swap" id="convSwap">tukar</button></div>
+    <div class="gm-input">
+      <input type="number" id="convOut" readonly placeholder="0">
+      <select class="conv-sel" id="convTo"></select>
+    </div>
+  </div>
+
+  <div class="gm" id="gm-mem" hidden>
+    <div class="mem-display" id="memVal">0</div>
+    <div class="mem-btns">
+      <button id="memMp">M+</button>
+      <button id="memMm">M−</button>
+      <button id="memMr">MR</button>
+      <button id="memMc" class="danger">MC</button>
+    </div>
+    <div class="gm-hint">M+ / M− memakai hasil yang tampil di kalkulator. MR memindahkan nilai ke layar, MC menghapus memori.</div>
+  </div>
+</div>
+
+<div id="intro">
+  <h1>KALKULATOR</h1>
+  <div class="sub">made by wilson</div>
+  <button class="go" id="goBtn">Let's Go</button>
+</div>
+
+<script>
+const exprEl = document.getElementById('expr');
+const resEl = document.getElementById('result');
+const historyList = document.getElementById('historyList');
+
+let expr = '';
+let justEvaluated = false;
+let pctCount = 0;
+const history = JSON.parse(localStorage.getItem('kalkHist') || '[]');
+
+const ops = { add: '+', sub: '-', mul: '*', div: '/' };
+
+let shownValue = 0;
+let digitLevel = -1;
+
+function fmt(n) {
+  const parts = String(n).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return parts.join(',');
+}
+
+function compute(str) {
+  try {
+    const value = Function('"use strict";return (' + str + ')')();
+    if (typeof value !== 'number' || !isFinite(value)) return 'Error';
+    return String(Math.round(value * 1e10) / 1e10);
+  } catch {
+    return '';
+  }
+}
+
+function render() {
+  exprEl.textContent = expr;
+  const v = expr ? compute(expr) : '0';
+  if (v && v !== 'Error') animateResult(v);
+  else resEl.textContent = v === 'Error' ? 'Error' : '0';
+}
+
+function animateResult(target) {
+  const start = parseFloat(shownValue) || 0;
+  const end = parseFloat(target) || 0;
+  const t0 = performance.now();
+  const dur = 220;
+  function step(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = start + (end - start) * eased;
+    resEl.textContent = fmt(String(Math.round(val * 1e10) / 1e10));
+    if (p < 1) requestAnimationFrame(step);
+    else {
+      shownValue = target;
+      resEl.textContent = fmt(target);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+const bubbles = {
+  d3: document.getElementById('d3bubble'),
+  av: document.getElementById('avbubble')
+};
+const bubbleTimers = {};
+
+function showBubble(key, msg) {
+  const b = bubbles[key];
+  if (msg) b.querySelector('.msg').textContent = msg;
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+  clearTimeout(bubbleTimers[key]);
+  bubbleTimers[key] = setTimeout(() => b.classList.remove('show'), 3500);
+}
+
+function randomChar() {
+  return Math.random() < 0.5 ? 'd3' : 'av';
+}
+
+function shakeChars() {
+  document.querySelectorAll('.char img').forEach(img => img.classList.add('shake'));
+}
+
+function shiverChars() {
+  document.querySelectorAll('.char img').forEach(img => img.classList.add('shiver'));
+}
+
+const toggleMsgs = {
+  hide: [
+    'heh, kalkulatornya disembunyikan?',
+    'jangan-jangan mau contekan',
+    'oke, kalkulator mode rahasia'
+  ],
+  show: [
+    'kalkulatornya muncul lagi',
+    'balik lagi, seru juga',
+    'mulai hitung lagi yuk'
+  ]
+};
+
+const histMsgs = [
+  'oh, mau pakai hasil lama ya, pintar',
+  'riwayat itu kenangan, jangan lupa',
+  'hasil kemarin dipakai lagi, mantap'
+];
+
+function rand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function triggerFlash() {
+  const f = document.getElementById('flash');
+  f.classList.remove('go');
+  void f.offsetWidth;
+  f.classList.add('go');
+  document.querySelectorAll('.char img').forEach(img => img.classList.add('jump'));
+}
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function clickSound(k) {
+  if (!audioCtx) return;
+  if (muted) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.value = k === 'eq' ? 1200 : 700;
+  g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + 0.09);
+}
+
+const fxCanvas = document.getElementById('fx');
+const ctx = fxCanvas.getContext('2d');
+let W = 0, H = 0;
+const particles = [];
+const confetti = [];
+
+function resizeFx() {
+  W = fxCanvas.width = window.innerWidth;
+  H = fxCanvas.height = window.innerHeight;
+}
+
+function spawnParticle(initial) {
+  return {
+    x: Math.random() * W,
+    y: initial ? Math.random() * H : -20,
+    r: 2 + Math.random() * 5,
+    vy: 0.4 + Math.random() * 1.2,
+    vx: (Math.random() - 0.5) * 0.5,
+    rot: Math.random() * Math.PI * 2,
+    vr: (Math.random() - 0.5) * 0.02,
+    hue: Math.random() < 0.6 ? 335 : Math.random() < 0.5 ? 300 : 180,
+    alpha: 0.3 + Math.random() * 0.45,
+    shape: Math.random() < 0.5 ? 'petal' : 'star'
+  };
+}
+
+function drawParticle(p) {
+  ctx.save();
+  ctx.globalAlpha = p.alpha;
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.rot);
+  ctx.fillStyle = 'hsl(' + p.hue + ', 80%, 75%)';
+  if (p.shape === 'petal') {
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.r * 1.6, p.r, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 5) {
+      ctx.lineTo(Math.cos(a) * p.r, Math.sin(a) * p.r);
+      ctx.lineTo(Math.cos(a + Math.PI / 5) * p.r * 0.5, Math.sin(a + Math.PI / 5) * p.r * 0.5);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function burstConfetti(x, y) {
+  const colors = ['#ff2e63', '#ffb3c6', '#ffd95c', '#7dff8a', '#8fb3ff', '#ffffff'];
+  for (let i = 0; i < 70; i++) {
+    confetti.push({
+      x: x + (Math.random() - 0.5) * 60,
+      y: y + (Math.random() - 0.5) * 60,
+      vx: (Math.random() - 0.5) * 10,
+      vy: -Math.random() * 12 - 2,
+      w: 4 + Math.random() * 5,
+      h: 4 + Math.random() * 5,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1
+    });
+  }
+}
+
+function fxLoop() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => {
+    p.y += p.vy;
+    p.x += p.vx + Math.sin(p.y / 50) * 0.3;
+    p.rot += p.vr;
+    if (p.y > H + 20 || p.x < -20 || p.x > W + 20) Object.assign(p, spawnParticle(false));
+    drawParticle(p);
+  });
+  for (let i = confetti.length - 1; i >= 0; i--) {
+    const c = confetti[i];
+    c.vy += 0.4;
+    c.x += c.vx;
+    c.y += c.vy;
+    c.rot += c.vr;
+    c.life -= 0.008;
+    if (c.life <= 0 || c.y > H + 20) { confetti.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, c.life);
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot);
+    ctx.fillStyle = c.color;
+    ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+    ctx.restore();
+  }
+  requestAnimationFrame(fxLoop);
+}
+resizeFx();
+window.addEventListener('resize', resizeFx);
+for (let i = 0; i < 42; i++) particles.push(spawnParticle(true));
+fxLoop();
+
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function addHistory(text, res) {
+  history.unshift({ text, res });
+  if (history.length > 10) history.pop();
+  localStorage.setItem('kalkHist', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  historyList.innerHTML = '';
+  if (!history.length) {
+    historyList.innerHTML = '<div class="hist-empty">belum ada riwayat</div>';
+    return;
+  }
+  history.forEach(h => {
+    const item = document.createElement('div');
+    item.className = 'hist-item';
+    item.innerHTML = '<span class="hist-expr">' + esc(h.text) + '</span><span class="hist-res">= ' + esc(fmt(h.res)) + '</span>';
+    item.addEventListener('click', () => {
+      expr = h.res;
+      justEvaluated = true;
+      render();
+      showBubble(randomChar(), rand(histMsgs));
+    });
+    historyList.appendChild(item);
+  });
+}
+
+function flashButton(k) {
+  const btn = document.querySelector('button[data-k="' + k + '"]');
+  if (!btn) return;
+  btn.classList.add('press');
+  setTimeout(() => btn.classList.remove('press'), 150);
+}
+
+function lookAt(btn) {
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const ratio = cx / window.innerWidth - 0.5;
+  const deg = ratio * 14;
+  document.querySelectorAll('.char img').forEach(img => {
+    if (img.classList.contains('walk')) return;
+    img.style.transform = 'rotate(' + deg + 'deg) translateY(' + (Math.abs(ratio) * 12) + 'px)';
+    setTimeout(() => { img.style.transform = ''; }, 500);
+  });
+}
+
+const pctEaster = [
+  'kok suka banget pencet %',
+  'persen melulu, nggak bosen?',
+  'jangan main % terus, itu cuma pembagian seratus',
+  'aku menangkapmu, suka persen',
+  'oke, % terakhir, jangan lagi ya'
+];
+
+const funnyResults = { '69': 1, '420': 1, '666': 1, '123456': 1, '80085': 1, '1337': 1 };
+const egg67 = [
+  '67! angka spesial, keren!',
+  '67, yang bikin kalkulator ini pasti bangga',
+  'wow 67, kau tahu rahasianya?',
+  '67 lagi 67 lagi, nomor favorit!'
+];
+const reactMsgs = [
+  'wah, hasilnya menarik',
+  'aku lebih baik diam',
+  'nggak nyangka',
+  'angka legendaris',
+  'matematika itu misterius',
+  'oke itu keren, tapi jangan dibawa main'
+];
+
+const opEaster = [
+  'jangan dobel operator dong',
+  'operator sekali aja cukup',
+  'hitung yang bener ya',
+  'iya iya, aku lihat operatornya'
+];
+
+const overwhelmMsgs = [
+  'mulai banyak juga nih angkanya',
+  'panjang banget, jangan sampai salah',
+  'aku mulai pusing',
+  'otakku meledak'
+];
+
+function checkOverwhelm() {
+  const digits = (expr.match(/\d/g) || []).length;
+  for (let i = overwhelmMsgs.length - 1; i >= 0; i--) {
+    if (digits >= 4 + i * 4 && i > digitLevel) {
+      digitLevel = i;
+      showBubble(randomChar(), overwhelmMsgs[i]);
+      return;
+    }
+  }
+}
+
+function press(k, btn) {
+  lookAt(btn);
+  clickSound(k);
+  if (k === 'C') {
+    expr = '';
+    digitLevel = -1;
+  } else if (k === 'back') {
+    expr = expr.slice(0, -1);
+  } else if (k === '%') {
+    if (!expr) return;
+    expr = '((' + expr + ')/100)';
+    pctCount++;
+    if (pctCount >= 3) {
+      pctCount = 0;
+      showBubble(randomChar(), pctEaster[Math.floor(Math.random() * pctEaster.length)]);
+    }
+  } else if (k === 'sq') {
+    if (!expr) return;
+    expr = '((' + expr + ') ** 2)';
+  } else if (k === 'sqrt') {
+    if (!expr) return;
+    expr = 'Math.sqrt(' + expr + ')';
+  } else if (k === 'neg') {
+    if (!expr) return;
+    expr = '-(' + expr + ')';
+  } else if (k === 'eq') {
+    const v = compute(expr);
+    if (v && v !== 'Error') {
+      const before = expr;
+      expr = v;
+      addHistory(before, v);
+      triggerFlash();
+      if (parseFloat(v) < 0) {
+        shiverChars();
+        showBubble(randomChar(), 'brr, minus. dingin banget');
+      }
+      const n = String(parseFloat(v));
+      if (parseFloat(v) === 67) {
+        showBubble(randomChar(), rand(egg67));
+        burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
+        burstConfetti(window.innerWidth / 2 + 120, window.innerHeight / 2);
+        burstConfetti(window.innerWidth / 2 - 120, window.innerHeight / 2);
+        document.querySelectorAll('.char img').forEach(img => img.classList.add('jump'));
+      } else if (funnyResults[n]) {
+        showBubble(randomChar(), reactMsgs[Math.floor(Math.random() * reactMsgs.length)]);
+        burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
+      }
+    }
+  } else if (ops[k]) {
+    if (!expr) return;
+    if (/[+\-*/]\s*$/.test(expr)) {
+      expr = expr.replace(/[+\-*/]\s*$/, ops[k] + ' ');
+      shakeChars();
+      showBubble(randomChar(), opEaster[Math.floor(Math.random() * opEaster.length)]);
+    } else {
+      expr += ' ' + ops[k] + ' ';
+    }
+  } else {
+    if (justEvaluated) { expr = ''; }
+    expr += k;
+    checkOverwhelm();
+  }
+  justEvaluated = k === 'eq';
+  render();
+}
+
+document.querySelectorAll('button[data-k]').forEach(b => {
+  b.addEventListener('click', () => press(b.dataset.k, b));
+});
+
+document.getElementById('clearHist').addEventListener('click', () => {
+  history.length = 0;
+  localStorage.setItem('kalkHist', JSON.stringify(history));
+  renderHistory();
+});
+
+document.getElementById('toggleCalc').addEventListener('click', () => {
+  const hidden = document.body.classList.toggle('calc-hidden');
+  showBubble(randomChar(), rand(hidden ? toggleMsgs.hide : toggleMsgs.show));
+});
+
+let muted = localStorage.getItem('kalkMute') === '1';
+const muteBtn = document.getElementById('muteBtn');
+function setMute(m) {
+  muted = m;
+  muteBtn.textContent = muted ? 'suara: off' : 'suara: on';
+  localStorage.setItem('kalkMute', muted ? '1' : '0');
+}
+setMute(muted);
+muteBtn.addEventListener('click', () => setMute(!muted));
+
+const themeBtn = document.getElementById('themeBtn');
+function setTheme(light) {
+  document.body.classList.toggle('light', light);
+  themeBtn.textContent = light ? 'mode gelap' : 'mode terang';
+  localStorage.setItem('kalkTheme', light ? 'light' : 'dark');
+}
+themeBtn.addEventListener('click', () => {
+  setTheme(!document.body.classList.contains('light'));
+});
+if (localStorage.getItem('kalkTheme') === 'light') setTheme(true);
+
+const colorNames = ['pink', 'purple', 'cyan', 'green', 'orange', 'gold'];
+function setColor(t) {
+  colorNames.forEach(n => document.body.classList.remove('theme-' + n));
+  document.body.classList.add('theme-' + t);
+  document.querySelectorAll('#palette .dot').forEach(d => d.classList.toggle('on', d.dataset.t === t));
+  localStorage.setItem('kalkColor', t);
+}
+document.querySelectorAll('#palette .dot').forEach(d => {
+  d.addEventListener('click', () => setColor(d.dataset.t));
+});
+const savedColor = localStorage.getItem('kalkColor');
+setColor(colorNames.indexOf(savedColor) !== -1 ? savedColor : 'pink');
+
+document.addEventListener('keydown', e => {
+  if (gameEl.classList.contains('open') || toolsEl.classList.contains('open')) {
+    if (e.key === 'Escape') { closeGame(); closeTools(); }
+    return;
+  }
+  const intro = document.getElementById('intro');
+  if (intro && e.key === 'Enter') {
+    document.getElementById('goBtn').click();
+    return;
+  }
+  const map = {
+    'Enter': 'eq', '=': 'eq', 'Backspace': 'back', 'Escape': 'C',
+    '*': 'mul', '/': 'div', '-': 'sub', '+': 'add', '^': 'sq', 'r': 'sqrt'
+  };
+  let k = null;
+  if (map[e.key]) k = map[e.key];
+  else if (/[0-9.%]/.test(e.key)) k = e.key;
+  if (k) {
+    flashButton(k);
+    const btn = document.querySelector('button[data-k="' + k + '"]');
+    press(k, btn);
+  }
+});
+
+document.getElementById('d3char').addEventListener('click', () => showBubble('d3'));
+document.getElementById('avchar').addEventListener('click', () => showBubble('av'));
+
+function startEntrance() {
+  document.body.classList.add('loaded');
+  document.querySelectorAll('.char img').forEach(img => img.classList.add('walk'));
+  setTimeout(() => showBubble('d3'), 2200);
+  setTimeout(() => showBubble('av'), 2900);
+  idleLoop();
+}
+
+const intro = document.getElementById('intro');
+document.getElementById('goBtn').addEventListener('click', () => {
+  intro.classList.add('exit');
+  startEntrance();
+  setTimeout(() => intro.remove(), 650);
+});
+
+document.querySelectorAll('.char img').forEach(img => {
+  img.addEventListener('animationend', () => {
+    img.classList.remove('walk', 'jump', 'shake', 'shiver');
+  });
+});
+
+document.querySelectorAll('.char').forEach(ch => {
+  let dragging = false, ox = 0, oy = 0, sx = 0, sy = 0;
+  ch.addEventListener('pointerdown', e => {
+    dragging = true;
+    ox = e.clientX;
+    oy = e.clientY;
+    sx = ch.offsetLeft;
+    sy = ch.offsetTop;
+    ch.style.transition = 'none';
+    ch.style.transform = 'none';
+    ch.style.right = 'auto';
+    ch.style.width = ch.offsetWidth + 'px';
+    ch.setPointerCapture(e.pointerId);
+  });
+  ch.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    ch.style.left = (sx + e.clientX - ox) + 'px';
+    ch.style.top = (sy + e.clientY - oy) + 'px';
+  });
+  ch.addEventListener('pointerup', () => {
+    dragging = false;
+    ch.style.transition = '';
+  });
+});
+
+function idleLoop() {
+  setTimeout(() => {
+    document.body.classList.remove('loaded');
+    setTimeout(() => {
+      document.body.classList.add('loaded');
+      document.querySelectorAll('.char img').forEach(img => img.classList.add('walk'));
+      showBubble('d3');
+      setTimeout(() => showBubble('av'), 800);
+    }, 2200);
+    idleLoop();
+  }, 25000);
+}
+
+render();
+renderHistory();
+
+const gameEl = document.getElementById('game');
+const gameBtn = document.getElementById('gameBtn');
+const gameClose = document.getElementById('gameClose');
+let activeMode = 'guess';
+
+const gGuessInput = document.getElementById('gGuessInput');
+const gGuessBtn = document.getElementById('gGuessBtn');
+const gRestart = document.getElementById('gRestart');
+const gAttemptsEl = document.getElementById('gAttempts');
+const gBestEl = document.getElementById('gBest');
+const gHint = document.getElementById('gHint');
+let gSecret = 0, gAttempts = 0;
+let gBest = parseInt(localStorage.getItem('kalkBest') || '0', 10);
+
+function gNewGame() {
+  gSecret = 1 + Math.floor(Math.random() * 100);
+  gAttempts = 0;
+  gAttemptsEl.textContent = '0';
+  gBestEl.textContent = gBest || '–';
+  gHint.textContent = 'pilih angka di antara 1 sampai 100. D3rlord3 dan Avery siap membantu.';
+  gGuessInput.value = '';
+  gGuessInput.disabled = false;
+  gGuessInput.focus();
+}
+
+function gSubmit() {
+  const n = parseInt(gGuessInput.value, 10);
+  if (!n || n < 1 || n > 100) {
+    gHint.textContent = 'angka harus di antara 1 sampai 100.';
+    return;
+  }
+  gAttempts++;
+  gAttemptsEl.textContent = gAttempts;
+  gGuessInput.value = '';
+  gGuessInput.focus();
+  if (n === gSecret) {
+    gGuessInput.disabled = true;
+    const newBest = !gBest || gAttempts < gBest;
+    gHint.textContent = 'benar!! angkanya ' + gSecret + ', tepat dalam ' + gAttempts + ' percobaan.' + (newBest ? ' rekor baru!' : '');
+    if (newBest) {
+      gBest = gAttempts;
+      localStorage.setItem('kalkBest', String(gBest));
+      gBestEl.textContent = gBest;
+    }
+    triggerFlash();
+    burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
+    showBubble(randomChar(), newBest ? 'rekor baru, hebat!' : 'tepat! kamu jago tebak angka');
+  } else if (n < gSecret) {
+    gHint.textContent = 'terlalu kecil. naikkan angkanya.';
+  } else {
+    gHint.textContent = 'terlalu besar. turunkan angkanya.';
+  }
+}
+
+gGuessBtn.addEventListener('click', gSubmit);
+gGuessInput.addEventListener('keydown', e => { if (e.key === 'Enter') gSubmit(); });
+gRestart.addEventListener('click', gNewGame);
+
+const mQ = document.getElementById('mQ');
+const mScoreEl = document.getElementById('mScore');
+const mTimeEl = document.getElementById('mTime');
+const mHint = document.getElementById('mHint');
+const mAnswerInput = document.getElementById('mAnswerInput');
+const mAnswerBtn = document.getElementById('mAnswerBtn');
+const mRestart = document.getElementById('mRestart');
+let mScore = 0, mAnswer = 0, mLeft = 30, mTimerId = null;
+
+function mNewQuestion() {
+  const type = Math.floor(Math.random() * 4);
+  let a, b, op, res;
+  if (type === 0) {
+    a = 2 + Math.floor(Math.random() * 98);
+    b = 2 + Math.floor(Math.random() * 98);
+    op = '+';
+    res = a + b;
+  } else if (type === 1) {
+    a = 2 + Math.floor(Math.random() * 98);
+    b = 2 + Math.floor(Math.random() * (a - 1));
+    op = '−';
+    res = a - b;
+  } else if (type === 2) {
+    a = 2 + Math.floor(Math.random() * 12);
+    b = 2 + Math.floor(Math.random() * 12);
+    op = '×';
+    res = a * b;
+  } else {
+    b = 2 + Math.floor(Math.random() * 12);
+    res = 2 + Math.floor(Math.random() * 12);
+    a = b * res;
+    op = '÷';
+  }
+  mAnswer = res;
+  mQ.textContent = a + ' ' + op + ' ' + b + ' = ?';
+  mAnswerInput.value = '';
+  mAnswerInput.disabled = false;
+  mAnswerInput.focus();
+}
+
+function mTick() {
+  mLeft--;
+  mTimeEl.textContent = mLeft;
+  if (mLeft <= 0) {
+    clearInterval(mTimerId);
+    mTimerId = null;
+    mAnswerInput.disabled = true;
+    mHint.textContent = 'waktu habis! skor kamu ' + mScore + '. coba lagi?';
+    showBubble(randomChar(), 'waktu habis, skor ' + mScore);
+  }
+}
+
+function mStart() {
+  if (mTimerId) clearInterval(mTimerId);
+  mScore = 0;
+  mLeft = 30;
+  mScoreEl.textContent = '0';
+  mTimeEl.textContent = '30';
+  mHint.textContent = 'jawab secepatnya, setiap benar dapat +1. waktu 30 detik!';
+  mNewQuestion();
+  mTimerId = setInterval(mTick, 1000);
+}
+
+function mSubmit() {
+  const v = parseInt(mAnswerInput.value, 10);
+  if (isNaN(v) || mAnswerInput.value.trim() === '') return;
+  if (v === mAnswer) {
+    mScore++;
+    mScoreEl.textContent = mScore;
+    mHint.textContent = 'benar! +1';
+    mNewQuestion();
+  } else {
+    mHint.textContent = 'salah, jawabannya ' + mAnswer + '.';
+  }
+}
+
+mAnswerBtn.addEventListener('click', mSubmit);
+mAnswerInput.addEventListener('keydown', e => { if (e.key === 'Enter') mSubmit(); });
+mRestart.addEventListener('click', mStart);
+
+function openGame() {
+  gameEl.classList.add('open');
+  if (activeMode === 'guess') gNewGame();
+  else mStart();
+}
+
+function closeGame() {
+  gameEl.classList.remove('open');
+  if (mTimerId) {
+    clearInterval(mTimerId);
+    mTimerId = null;
+  }
+}
+
+gameBtn.addEventListener('click', () => {
+  if (gameEl.classList.contains('open')) closeGame();
+  else { closeTools(); openGame(); }
+});
+gameClose.addEventListener('click', closeGame);
+
+document.querySelectorAll('.game-tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    if (mTimerId) {
+      clearInterval(mTimerId);
+      mTimerId = null;
+    }
+    document.querySelectorAll('.game-tabs .tab').forEach(x => x.classList.toggle('on', x === t));
+    activeMode = t.dataset.mode;
+    document.getElementById('gm-guess').hidden = activeMode !== 'guess';
+    document.getElementById('gm-math').hidden = activeMode !== 'math';
+    if (activeMode === 'guess') gNewGame();
+    else mStart();
+  });
+});
+
+const toolsEl = document.getElementById('tools');
+const toolsBtn = document.getElementById('toolsBtn');
+const toolsClose = document.getElementById('toolsClose');
+let activeTool = 'conv';
+
+const CONV_UNITS = {
+  panjang: [
+    { n: 'meter', f: 1 }, { n: 'cm', f: 0.01 }, { n: 'km', f: 1000 },
+    { n: 'inci', f: 0.0254 }, { n: 'kaki', f: 0.3048 }, { n: 'mil', f: 1609.344 }
+  ],
+  berat: [
+    { n: 'kg', f: 1 }, { n: 'gram', f: 0.001 }, { n: 'pon', f: 0.45359237 },
+    { n: 'ons', f: 0.0283495231 }, { n: 'ton', f: 1000 }
+  ],
+  kecepatan: [
+    { n: 'm/s', f: 1 }, { n: 'km/jam', f: 1 / 3.6 }, { n: 'mil/jam', f: 0.44704 }, { n: 'knot', f: 0.514444 }
+  ],
+  suhu: [
+    { n: '°C', toB: v => v, fromB: v => v },
+    { n: '°F', toB: v => (v - 32) * 5 / 9, fromB: v => v * 9 / 5 + 32 },
+    { n: 'K', toB: v => v - 273.15, fromB: v => v + 273.15 }
+  ]
+};
+
+const convCat = document.getElementById('convCat');
+const convVal = document.getElementById('convVal');
+const convOut = document.getElementById('convOut');
+const convFrom = document.getElementById('convFrom');
+const convTo = document.getElementById('convTo');
+const convSwap = document.getElementById('convSwap');
+
+function convPopulateUnits() {
+  const units = CONV_UNITS[convCat.value];
+  convFrom.innerHTML = '';
+  convTo.innerHTML = '';
+  units.forEach((u, i) => {
+    convFrom.appendChild(new Option(u.n, i));
+    convTo.appendChild(new Option(u.n, i));
+  });
+  convTo.selectedIndex = units.length > 1 ? 1 : 0;
+  convUpdate();
+}
+
+function convUpdate() {
+  const v = parseFloat(convVal.value);
+  if (isNaN(v)) {
+    convOut.value = '';
+    return;
+  }
+  const cat = CONV_UNITS[convCat.value];
+  const fromU = cat[+convFrom.value];
+  const toU = cat[+convTo.value];
+  const base = fromU.toB ? fromU.toB(v) : v * fromU.f;
+  const out = toU.fromB ? toU.fromB(base) : base / toU.f;
+  convOut.value = fmt(String(Math.round(out * 1e10) / 1e10));
+}
+
+convCat.addEventListener('change', convPopulateUnits);
+convVal.addEventListener('input', convUpdate);
+convFrom.addEventListener('change', convUpdate);
+convTo.addEventListener('change', convUpdate);
+convSwap.addEventListener('click', () => {
+  const f = convFrom.selectedIndex;
+  convFrom.selectedIndex = convTo.selectedIndex;
+  convTo.selectedIndex = f;
+  convUpdate();
+});
+
+let memVal = parseFloat(localStorage.getItem('kalkMem') || '0') || 0;
+const memValEl = document.getElementById('memVal');
+function memRender() {
+  memValEl.textContent = fmt(String(Math.round(memVal * 1e10) / 1e10));
+  localStorage.setItem('kalkMem', String(memVal));
+}
+function memCurrent() {
+  const v = parseFloat(shownValue);
+  return isFinite(v) ? v : 0;
+}
+document.getElementById('memMp').addEventListener('click', () => {
+  memVal += memCurrent();
+  memRender();
+  showBubble(randomChar(), 'memori: +' + fmt(String(memCurrent())));
+});
+document.getElementById('memMm').addEventListener('click', () => {
+  memVal -= memCurrent();
+  memRender();
+  showBubble(randomChar(), 'memori: −' + fmt(String(memCurrent())));
+});
+document.getElementById('memMr').addEventListener('click', () => {
+  expr = String(memVal);
+  justEvaluated = true;
+  render();
+  showBubble(randomChar(), 'nilai memori dipindah ke layar');
+});
+document.getElementById('memMc').addEventListener('click', () => {
+  memVal = 0;
+  memRender();
+  showBubble(randomChar(), 'memori dihapus');
+});
+memRender();
+
+function openTools() {
+  toolsEl.classList.add('open');
+  if (activeTool === 'conv') convPopulateUnits();
+}
+function closeTools() {
+  toolsEl.classList.remove('open');
+}
+toolsBtn.addEventListener('click', () => {
+  if (toolsEl.classList.contains('open')) closeTools();
+  else { closeGame(); openTools(); }
+});
+toolsClose.addEventListener('click', closeTools);
+
+document.querySelectorAll('#tools .game-tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#tools .game-tabs .tab').forEach(x => x.classList.toggle('on', x === t));
+    activeTool = t.dataset.mode;
+    document.getElementById('gm-conv').hidden = activeTool !== 'conv';
+    document.getElementById('gm-mem').hidden = activeTool !== 'mem';
+    if (activeTool === 'conv') convPopulateUnits();
+  });
+});
+
+resEl.style.cursor = 'pointer';
+resEl.title = 'klik untuk menyalin hasil';
+resEl.addEventListener('click', () => {
+  const txt = String(parseFloat(shownValue) || 0);
+  const done = () => showBubble(randomChar(), 'hasil disalin: ' + txt);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done).catch(done);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (err) {}
+    document.body.removeChild(ta);
+    done();
+  }
+});
+</script>
+</body>
+</html>
